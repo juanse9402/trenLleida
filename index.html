@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#120F0C">
+  <meta name="description" content="Audio Ilertren — Guía de audio GPS para trenes turísticos Ilertren">
+  <title>Audio Ilertren</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+  <div class="app-shell" id="appShell">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">
+          <img src="assets/logos/ilertren-logo.png" alt="Ilertren" class="brand-logo" width="38" height="38">
+        </div>
+        <div>
+          <h1 class="brand-name">Audio Ilertren</h1>
+          <div class="brand-sub">Lleida</div>
+        </div>
+      </div>
+
+      <div class="status-cluster">
+        <span class="clock" id="currentTimeClock">12:00</span>
+        <div class="pill pill-gps-off" id="gpsPill">
+          <span class="dot" id="gpsDot"></span>
+          <span id="gpsStatus">GPS inactivo</span>
+          <button id="btnGpsRetry" class="btn-edit hidden" style="margin-left:8px;padding:2px 8px;font-size:.72rem;">Reintentar</button>
+          <span id="accuracyBadge" style="font-family:'JetBrains Mono';margin-left:5px;"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <google-cast-launcher id="castButton" title="Conectar a Chromecast" style="display:inline-block;width:28px;height:28px;cursor:pointer;--connected-color:var(--ok);--disconnected-color:var(--paper-dimmer);"></google-cast-launcher>
+          <button id="btnFullscreen" class="btn-theme" aria-label="Pantalla completa" title="Alternar pantalla completa" style="display:flex;align-items:center;justify-content:center; width:44px; height:44px; background:var(--coal-800); border:1px solid var(--coal-600); border-radius:8px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+          </button>
+          <button id="btnDownloadOffline" class="btn-edit" aria-label="Descargar ruta offline" title="Descargar audios y ruta para uso sin conexión"><span class="btn-icon">📥</span> <span class="btn-text">Descargar offline</span></button>
+          <button id="btnOpenEditor" class="btn-edit" aria-label="Abrir editor de ruta">⚙ Editar ruta</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- GPS ALERT BANNER — visible when GPS is inactive -->
+    <div class="gps-alert-banner" id="gpsAlertBanner">
+      <div class="gps-alert-left">
+        <span class="gps-alert-icon">📍</span>
+        <div class="gps-alert-text">
+          <span class="gps-alert-title" id="gpsAlertTitle">GPS INACTIVO — La ruta no puede guiarse</span>
+          <span class="gps-alert-sub" id="gpsAlertSub">Activa la ubicación antes de salir. Los audios no se dispararán automáticamente.</span>
+        </div>
+      </div>
+      <button class="gps-alert-btn" id="gpsAlertRetry">
+        Activar GPS ahora
+      </button>
+    </div>
+
+    <!-- MAIN GRID: 2 columnas -->
+    <div class="main">
+
+      <!-- COLUMNA IZQUIERDA: CONTROLES -->
+      <div class="right-col">
+        <span class="hold-hint" id="holdHint">Mantén pulsado 1.5s</span>
+
+        <div class="top-controls-row">
+          <div class="hold-btn-wrap" id="holdBtn">
+            <svg class="ring" viewBox="0 0 158 158">
+              <circle class="hold-track" cx="79" cy="79" r="76"/>
+              <circle class="hold-fill" cx="79" cy="79" r="76" id="holdFill"/>
+            </svg>
+            <div class="hold-core" id="holdCore">
+              <svg id="holdPlayIcon" viewBox="0 0 24 24" style="fill:var(--paper)"><path d="M8 5v14l11-7z"/></svg>
+              <span class="hold-core-label" id="holdLabel">INICIAR</span>
+            </div>
+          </div>
+
+          <div class="pause-row" id="pauseRow">
+            <button class="pause-btn" id="pauseBtn">
+              <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+              <span id="pauseLabel">Pausa</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="secondary-row">
+          <button class="secondary-btn" id="btnPlayLast" aria-label="Repetir" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+            Repetir
+          </button>
+          <button class="btn-siguiente" id="btnSkip" aria-label="Siguiente audio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
+            Siguiente audio
+          </button>
+        </div>
+
+
+
+        <div class="ambient-btn" id="ambientBtn" aria-label="Alternar música ambiente">
+          <div class="ambient-btn-left">
+            <span class="ambient-btn-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M9 18V5l12-2v13M9 9l12-2"/>
+                <circle cx="6" cy="18" r="3"/>
+                <circle cx="18" cy="16" r="3"/>
+              </svg>
+            </span>
+            <span class="ambient-btn-label" id="ambientLabel">Música ambiente</span>
+          </div>
+          <div class="ambient-toggle" id="ambientToggleEl"></div>
+        </div>
+      </div>
+
+      <!-- COLUMNA DERECHA: now-playing + stats (2 filas) -->
+      <div class="cluster-card-wrapper">
+
+        <!-- Bloque unificado de audio -->
+        <div class="now-playing-card">
+          <div class="now-playing-top" style="position:relative;">
+            <select id="stopSelector" aria-label="Seleccionar parada" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none;">
+              <option disabled selected>Cargando ruta...</option>
+            </select>
+            <span class="now-playing-icon">🎵</span>
+            <div class="now-playing-info">
+              <div class="now-playing-label" id="nowPlayingLabel">Reproduciendo ahora</div>
+              <div class="now-playing-name" id="paradaActualNombre">Inactivo</div>
+            </div>
+            <span class="now-playing-time">
+              <span id="audioCurrentTime">0:00</span> / <span id="audioDuration">0:00</span>
+            </span>
+          </div>
+          <div class="now-playing-bar">
+            <div class="now-playing-fill" id="progressBar" style="width:0%"></div>
+          </div>
+          <div class="now-playing-next">
+            <span class="now-playing-next-arrow">↳</span>
+            <span class="now-playing-next-label">A continuación:</span>
+            <span class="now-playing-next-name" id="paradaSiguienteNombre">—</span>
+          </div>
+        </div>
+
+        <!-- Estadísticas 2×2 -->
+        <div class="stats-card">
+          <div class="stats-header">
+            <span class="stats-title">Estadísticas del recorrido</span>
+            <span class="stats-eta" id="mapEta">🚏 Próxima en — m</span>
+          </div>
+          <div class="stats-grid">
+            <div class="route-stat">
+              <span class="route-stat-label">Parada actual</span>
+              <span class="route-stat-value accent" id="mapStopCounter">— / —</span>
+            </div>
+            <div class="route-stat">
+              <span class="route-stat-label">Tiempo en ruta</span>
+              <span class="route-stat-value" id="mapTimeInRoute">00:00:00</span>
+            </div>
+            <div class="route-stat">
+              <span class="route-stat-label">Distancia próxima</span>
+              <span class="route-stat-value" id="mapDistancia">— m</span>
+            </div>
+            <div class="route-stat">
+              <span class="route-stat-label">Velocidad</span>
+              <span class="route-stat-value" id="mapSpeed">— km/h</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /cluster-card-wrapper -->
+
+    </div><!-- /main -->
+  </div><!-- /app-shell -->
+
+  <!-- EDITOR -->
+  <div id="editorScreen" class="editor-overlay hidden" role="dialog" aria-modal="true" aria-label="Editor de ruta">
+    <header class="editor-header">
+      <h2 class="editor-title">Editor de ruta</h2>
+      <button id="btnCloseEditor" class="btn-edit" aria-label="Cerrar editor">✕ Cerrar</button>
+    </header>
+    <div class="editor-actions" style="border-bottom: 1px solid var(--coal-600); padding-bottom: 12px; margin-bottom: 12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <div class="pill pill-net" style="margin: 0; background:var(--coal-800); border:1px solid var(--coal-600); padding: 6px 12px; border-radius: 6px;">📶 Offline · caché</div>
+      <button id="btnTheme" class="btn-edit" aria-label="Cambiar modo" title="Modo claro / oscuro">☀️ Tema</button>
+      <button id="btnOpenPlanilla" class="btn-edit" aria-label="Abrir planilla de cuentas" title="Abrir Planilla de Cuentas">
+        <span class="btn-icon">💶</span> <span class="btn-text">Planilla €/$</span>
+      </button>
+    </div>
+    <div class="editor-actions">
+      <button id="btnExport" class="btn-edit">📥 Exportar ruta</button>
+      <button id="btnAddStop" class="btn-edit" style="border-color:var(--brass);color:var(--brass);">+ Nueva parada</button>
+      <button id="btnResetRoute" class="btn-edit" style="border-color:var(--brick);color:var(--brick);margin-left:auto;">↺ Restablecer original</button>
+    </div>
+    <div class="editor-gps-banner" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; background: var(--coal-800); border-bottom: 1px solid var(--hairline); gap: 10px; flex-wrap: wrap;">
+      <div style="font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+        <span>📍 Ubicación del Tren:</span>
+        <span id="editorGpsCoords" style="color: var(--paper-dim);">No consultada</span>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button id="btnEditorGetGps" class="btn-edit" style="padding: 6px 12px; font-size: 12px; border-color: var(--brass); color: var(--brass);">🔄 Obtener Ubicación</button>
+        <a id="btnEditorOpenMap" href="#" target="_blank" class="btn-edit hidden" style="padding: 6px 12px; font-size: 12px; text-decoration: none; border-color: var(--ok); color: var(--ok); display: inline-flex; align-items: center;">🗺️ Ver en Google Maps</a>
+      </div>
+    </div>
+    <ul id="editorStopsList" class="editor-stops-list" aria-label="Lista de paradas"></ul>
+  </div>
+
+  <!-- MODAL RGPD -->
+  <div id="rgpdModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="rgpdTitle">
+    <div class="modal-card">
+      <h2 id="rgpdTitle" class="modal-title">Consentimiento de Ubicación</h2>
+      <p class="modal-text">Esta app usa tu ubicación GPS en tiempo real para guiarte por la ruta. Los datos de posición <strong>NO</strong> se envían a ningún servidor externo y se procesan únicamente en tu dispositivo.</p>
+      <div class="rgpd-expandable">
+        <button id="btnRgpdToggle" class="btn-edit" aria-expanded="false" style="margin-top:8px;width:auto;display:inline-flex;">ℹ️ Más información</button>
+        <div id="rgpdMoreInfo" class="rgpd-info-text hidden">La geolocalización se utiliza únicamente para calcular la distancia a la siguiente parada del recorrido y reproducir automáticamente la guía de audio correspondiente. No recopilamos, compartimos, vendemos ni guardamos tu historial de ubicación.</div>
+      </div>
+      <div class="modal-actions">
+        <button id="btnRgpdAccept" class="btn-edit" style="width:100%;border-color:var(--ok);color:#5B8A5A;padding:14px;">Entendido, activar GPS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN MODAL -->
+  <div id="pinModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+    <div class="modal-card" style="max-width:320px; text-align:center;">
+      <h2 id="pinTitle" class="modal-title">Acceso administrador</h2>
+      <p class="modal-text" style="margin-bottom:20px;">
+        Introduce el PIN para editar la ruta
+      </p>
+      <input id="pinInput" type="password" inputmode="numeric"
+             maxlength="4" placeholder="• • • •"
+             style="font-size:32px; text-align:center; letter-spacing:12px;
+                    width:100%; padding:14px; border-radius:6px;
+                    border:2px solid var(--coal-600);
+                    background:var(--coal-800); color:var(--paper);">
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button id="pinCancel" class="btn-edit" style="flex:1;">Cancelar</button>
+        <button id="pinConfirm" class="btn-edit"
+                style="flex:1; border-color:var(--ok); color:var(--ok);">
+          Confirmar
+        </button>
+      </div>
+      <p id="pinError" style="color:var(--brick-bright); font-size:13px;
+         margin-top:10px; display:none;">PIN incorrecto</p>
+    </div>
+  </div>
+
+  <!-- PLANILLA SCREEN (OVERLAY) -->
+  <div id="planillaScreen" class="editor-overlay hidden" role="dialog" aria-modal="true" aria-label="Planilla de cuentas">
+    <header class="editor-header">
+      <h2 class="editor-title">Planilla de cuentas</h2>
+      <button id="btnClosePlanilla" class="btn-edit" aria-label="Cerrar planilla">✕ Cerrar</button>
+    </header>
+    <div style="width: 100%; height: calc(100% - 56px); overflow: hidden; background: var(--coal-950);">
+      <iframe id="planillaIframe" src="./planilla.html" style="width: 100%; height: 100%; border: none;"></iframe>
+    </div>
+  </div>
+
+  <audio id="audioPlayer" aria-hidden="true" preload="none"></audio>
+  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+  <script src="env-config.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+[
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "BENVINGUDA CENTRE HISTORIC",
+        "audio": "PISTA 01 - BENVINGUDA CENTRE HISTORIC.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "CINEMA VINYES - RIU SEGRE - GEGANTS",
+        "audio": "PISTA 02 - CINEMA VINYES - RIU SEGRE - GEGANTS.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "AV CATALUNYA CASA BARO",
+        "audio": "PISTA 03 - AV CATALUNYA CASA BARO.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "MUSEU LLEIDA",
+        "audio": "PISTA 04 - MUSEU LLEIDA.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "SANTA CLARA - CASTELLERS",
+        "audio": "PISTA 05 - SANTA CLARA - CASTELLERS.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "SANT LLORENÇ",
+        "audio": "PISTA 06 - SANT LLORENÇ.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "SANT MARTI",
+        "audio": "PISTA 07 - SANT MARTI.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "MERCAT DEL PLA",
+        "audio": "PISTA 08 - MERCAT DEL PLA.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "TURO SEU VELLA",
+        "audio": "PISTA 09 - TURO SEU VELLA.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "SEU VELLA 1",
+        "audio": "PISTA 10 - SEU VELLA 1.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "SEU VELLA 2",
+        "audio": "PISTA 11 - SEU VELLA 2.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "SEU VELLA 3",
+        "audio": "PISTA 12 - SEU VELLA 3.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "SANTA CECILIA",
+        "audio": "PISTA 13 - SANTA CECILIA.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "RICADO - PARADA",
+        "audio": "PISTA 14 - RICADO - PARADA .mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "RECTORAT",
+        "audio": "PISTA 15 - RECTORAT.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "PALAU DEL BISBE",
+        "audio": "PISTA 16 - PALAU DEL BISBE.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "CATEDRAL NOVA",
+        "audio": "PISTA 17 - CATEDRAL NOVA.mp3"
+    },
+    {
+        "lon": 0,
+        "lat": 0,
+        "name": "IEI ANTIC HOSPITAL STA MARIA",
+        "audio": "PISTA 18 - IEI ANTIC HOSPITAL STA MARIA.mp3"
+    }
+]

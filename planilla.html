@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Caja - Tren Turístico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="planilla.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-content">
+        <div class="logo">
+          <i class="bi bi-train-front-fill icon-gradient"></i>
+          <h1>Control de Caja <span>IlerTren</span></h1>
+        </div>
+        <button id="btn-settings" class="btn btn-secondary">
+          <i class="bi bi-gear-fill"></i> Configuración
+        </button>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <!-- STEP 1: Upload & Date Selection -->
+      <section class="card upload-section">
+        <div class="card-header">
+          <h2><i class="bi bi-camera-fill"></i> Subir Foto de Cierre</h2>
+          <p>Selecciona la fecha y sube la foto de los talonarios junto al datáfono</p>
+        </div>
+
+        <div class="form-group date-group">
+          <label for="select-date"><i class="bi bi-calendar-event"></i> Fecha de Trabajo</label>
+          <select id="select-date" class="form-control">
+            <option value="" disabled selected>Cargando fechas desde Excel...</option>
+          </select>
+        </div>
+
+        <div class="upload-dropzone" id="dropzone">
+          <input type="file" id="file-input" accept="image/*" capture="environment">
+          <div class="dropzone-content">
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+            <h3>Arrastra la imagen aquí</h3>
+            <p>o haz clic para tomar una foto/seleccionar archivo</p>
+            <span class="file-name" id="file-name">Ningún archivo seleccionado</span>
+          </div>
+        </div>
+
+        <div class="image-preview-container" id="preview-container" style="display: none;">
+          <img id="image-preview" src="" alt="Vista previa">
+          <button id="btn-remove-image" class="btn-remove"><i class="bi bi-trash-fill"></i> Quitar imagen</button>
+        </div>
+
+        <button id="btn-process" class="btn btn-primary btn-block" disabled>
+          <i class="bi bi-cpu-fill"></i> Analizar con IA (Gemini)
+        </button>
+      </section>
+
+      <!-- STEP 2: Processing state -->
+      <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-spinner-container">
+          <div class="spinner"></div>
+          <h3>La IA está analizando la imagen...</h3>
+          <p>Extrayendo números de talonarios y recaudación del datáfono</p>
+        </div>
+      </div>
+
+      <!-- STEP 3: Form Review & Sync -->
+      <section class="card review-section" id="review-section" style="display: none;">
+        <div class="card-header">
+          <h2><i class="bi bi-card-checklist"></i> Validar Datos Extraídos</h2>
+          <p>Verifica que los números coincidan con la foto y edítalos si es necesario</p>
+        </div>
+
+        <form id="review-form">
+          <div class="tickets-grid">
+            <!-- ADULTOS -->
+            <div class="ticket-card adult">
+              <div class="ticket-badge">Adultos (Blanco)</div>
+              <div class="form-row">
+                <div class="col">
+                  <label>DEL Nº</label>
+                  <input type="number" id="adultos_del" class="form-control" readonly>
+                </div>
+                <div class="col">
+                  <label>AL Nº</label>
+                  <input type="number" id="adultos_al" class="form-control target-input" required>
+                </div>
+              </div>
+              <div class="ticket-calculations">
+                <span>Pasajeros: <strong id="calc_adultos_qty">0</strong></span>
+                <span>Subtotal: <strong id="calc_adultos_total">0.00€</strong></span>
+              </div>
+            </div>
+
+            <!-- INFANTIL -->
+            <div class="ticket-card child">
+              <div class="ticket-badge">Infantil (Amarillo)</div>
+              <div class="form-row">
+                <div class="col">
+                  <label>DEL Nº</label>
+                  <input type="number" id="infantil_del" class="form-control" readonly>
+                </div>
+                <div class="col">
+                  <label>AL Nº</label>
+                  <input type="number" id="infantil_al" class="form-control target-input" required>
+                </div>
+              </div>
+              <div class="ticket-calculations">
+                <span>Pasajeros: <strong id="calc_infantil_qty">0</strong></span>
+                <span>Subtotal: <strong id="calc_infantil_total">0.00€</strong></span>
+              </div>
+            </div>
+
+            <!-- GRATUITO -->
+            <div class="ticket-card free">
+              <div class="ticket-badge">Gratuito (Verde)</div>
+              <div class="form-row">
+                <div class="col">
+                  <label>DEL Nº</label>
+                  <input type="number" id="gratuito_del" class="form-control" readonly>
+                </div>
+                <div class="col">
+                  <label>AL Nº</label>
+                  <input type="number" id="gratuito_al" class="form-control target-input" required>
+                </div>
+              </div>
+              <div class="ticket-calculations">
+                <span>Pasajeros: <strong id="calc_gratuito_qty">0</strong></span>
+                <span>Gratis</span>
+              </div>
+            </div>
+
+            <!-- GRUPOS -->
+            <div class="ticket-card group">
+              <div class="ticket-badge">Grupos > 10 (Azul)</div>
+              <div class="form-row">
+                <div class="col">
+                  <label>DEL Nº</label>
+                  <input type="number" id="grupos_del" class="form-control" readonly>
+                </div>
+                <div class="col">
+                  <label>AL Nº</label>
+                  <input type="number" id="grupos_al" class="form-control target-input" required>
+                </div>
+              </div>
+              <div class="ticket-calculations">
+                <span>Pasajeros: <strong id="calc_grupos_qty">0</strong></span>
+                <span>Subtotal: <strong id="calc_grupos_total">0.00€</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECAUDACION Y COMPARATIVA -->
+          <div class="reconciliation-panel">
+            <div class="reconciliation-row">
+              <div class="reconcile-card">
+                <label for="recaudacion"><i class="bi bi-credit-card-2-back-fill"></i> Pago Datáfono (Recaudación)</label>
+                <div class="input-with-symbol">
+                  <input type="number" step="0.01" id="recaudacion" class="form-control target-input" required>
+                  <span class="symbol">€</span>
+                </div>
+              </div>
+              <div class="reconcile-card highlight">
+                <label>Facturación Total Estimada</label>
+                <div class="calculated-value" id="calc_fac_real">0.00€</div>
+              </div>
+            </div>
+
+            <div class="discrepancy-banner" id="discrepancy-banner">
+              <i class="bi bi-info-circle-fill"></i>
+              <span id="discrepancy-text">Las cifras coinciden perfectamente.</span>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-save" class="btn btn-success btn-block">
+            <i class="bi bi-file-earmark-excel-fill"></i> Confirmar y Guardar en Excel
+          </button>
+        </form>
+      </section>
+
+      <!-- AUDIT LOG SECTION -->
+      <section class="card audit-section">
+        <div class="card-header audit-header">
+          <h2><i class="bi bi-shield-check-fill"></i> Registro de Auditoría</h2>
+          <button id="btn-refresh-audit" class="btn btn-secondary btn-sm">
+            <i class="bi bi-arrow-clockwise"></i> Actualizar
+          </button>
+        </div>
+        <p class="section-desc">Últimos cierres de caja registrados en Google Sheets y su estado de cuadre</p>
+        
+        <div class="table-container">
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Adultos (Al)</th>
+                <th>Infantil (Al)</th>
+                <th>Gratuito (Al)</th>
+                <th>Grupos (Al)</th>
+                <th>Recaudado</th>
+                <th>Cuadre</th>
+              </tr>
+            </thead>
+            <tbody id="audit-table-body">
+              <tr>
+                <td colspan="7" class="text-center">Cargando registros...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal" id="settings-modal" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3><i class="bi bi-key-fill"></i> Configuración</h3>
+            <button id="btn-close-settings" class="btn-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p>Introduce las claves y URLs para conectar la planilla y la IA. Se guardan localmente en el navegador.</p>
+            <div class="form-group" style="margin-bottom: 15px;">
+              <label for="input-api-key">Gemini API Key</label>
+              <input type="password" id="input-api-key" class="form-control" placeholder="AIzaSy...">
+            </div>
+            <div class="form-group">
+              <label for="input-script-url">Google Apps Script URL (Planilla)</label>
+              <input type="text" id="input-script-url" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="btn-save-settings" class="btn btn-primary">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="planilla.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# ─── Build ────────────────────────────────────────────────────────────────────
+# Generates app/env-config.js at deploy time with the Google Maps API key
+# stored as a Netlify environment variable (never committed to git).
+#
+# To configure:
+#   1. Netlify Dashboard → Site → Environment variables
+#   2. Add variable: GOOGLE_MAPS_KEY = <your restricted API key>
+#   3. Restrict the key in Google Cloud Console to:
+#        - trenconductor.netlify.app/*
+#        - localhost/*  (for local dev)
+#
+# For LOCAL development, create env-config.js manually:
+#   echo "window.GOOGLE_MAPS_KEY='YOUR_KEY_HERE';" > env-config.js
+# Add it to .gitignore so it's never committed.
+
+[build]
+  command = "echo \"window.GOOGLE_MAPS_KEY='$GOOGLE_MAPS_KEY'; window.ADMIN_PIN='$ADMIN_PIN';\" > env-config.js"
+  publish = "."
+
+# ─── Security Headers ─────────────────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # CSP: allow Google Maps scripts, tiles and Cast SDK
+    Content-Security-Policy = "default-src 'self'; script-src 'self' https://maps.googleapis.com https://maps.gstatic.com https://www.gstatic.com; connect-src 'self' https://maps.googleapis.com https://maps.gstatic.com https://khm0.googleapis.com https://khm1.googleapis.com; img-src 'self' data: blob: https://maps.gstatic.com https://maps.googleapis.com https://streetviewpixels-pa.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; worker-src blob:;"
+    X-Frame-Options           = "DENY"
+    X-Content-Type-Options    = "nosniff"
+    Referrer-Policy           = "strict-origin-when-cross-origin"
+    Permissions-Policy        = "geolocation=(self)"
