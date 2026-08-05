@@ -54,6 +54,14 @@
         "audio": "PISTA 10 - SEU VELLA 1.mp3"
     },
     {
+        "lon": 0.626308,
+        "lat": 41.617511,
+        "name": "PUNTO DE GIRO (Control Silencioso)",
+        "audio": "",
+        "isCheckpoint": true,
+        "radius": 20
+    },
+    {
         "lon": 0.626355,
         "lat": 41.617006,
         "name": "SEU VELLA 2",
