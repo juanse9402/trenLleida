@@ -32,12 +32,6 @@
     {
         "lon": 0,
         "lat": 0,
-        "name": "SANT LLORENÇ",
-        "audio": "PISTA 06 - SANT LLORENÇ.mp3"
-    },
-    {
-        "lon": 0,
-        "lat": 0,
         "name": "SANT MARTI",
         "audio": "PISTA 07 - SANT MARTI.mp3"
     },
@@ -66,26 +60,26 @@
         "audio": "PISTA 11 - SEU VELLA 2.mp3"
     },
     {
-        "lon": 0,
-        "lat": 0,
+        "lon": 0.62591,
+        "lat": 41.617896,
         "name": "SEU VELLA 3",
         "audio": "PISTA 12 - SEU VELLA 3.mp3"
     },
     {
-        "lon": 0,
-        "lat": 0,
+        "lon": 0.622935,
+        "lat": 41.617792,
         "name": "SANTA CECILIA",
         "audio": "PISTA 13 - SANTA CECILIA.mp3"
     },
     {
-        "lon": 0,
-        "lat": 0,
+        "lon": 0.621384,
+        "lat": 41.618189,
         "name": "RICADO - PARADA",
         "audio": "PISTA 14 - RICADO - PARADA .mp3"
     },
     {
-        "lon": 0,
-        "lat": 0,
+        "lon": 0.618276,
+        "lat": 41.6158,
         "name": "RECTORAT",
         "audio": "PISTA 15 - RECTORAT.mp3"
     },
@@ -96,14 +90,20 @@
         "audio": "PISTA 16 - PALAU DEL BISBE.mp3"
     },
     {
-        "lon": 0,
-        "lat": 0,
+        "lon": 0.620079,
+        "lat": 41.613931,
+        "name": "SANT LLORENÇ",
+        "audio": "PISTA 06 - SANT LLORENÇ.mp3"
+    },
+    {
+        "lon": 0.623562,
+        "lat": 41.611484,
         "name": "CATEDRAL NOVA",
         "audio": "PISTA 17 - CATEDRAL NOVA.mp3"
     },
     {
-        "lon": 0,
-        "lat": 0,
+        "lon": 0.623052,
+        "lat": 41.612033,
         "name": "IEI ANTIC HOSPITAL STA MARIA",
         "audio": "PISTA 18 - IEI ANTIC HOSPITAL STA MARIA.mp3"
     }
