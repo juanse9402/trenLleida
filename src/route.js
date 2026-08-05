@@ -68,6 +68,7 @@ function sanitizeRoute(data) {
     lat:   parseFloat(stop.lat),
     lon:   parseFloat(stop.lon),
     audio: typeof stop.audio === 'string' ? stop.audio.trim() : '',
+    isCheckpoint: !!stop.isCheckpoint,
   }));
 }
 

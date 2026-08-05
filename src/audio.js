@@ -363,6 +363,13 @@ export async function playCurrentStop() {
   }
 
   const stop = route[currentStopIndex];
+
+  if (stop.isCheckpoint) {
+    logSuccess(`📍 Punto de control silencioso alcanzado: ${stop.name}`);
+    setState({ currentStopIndex: currentStopIndex + 1 });
+    return;
+  }
+
   logInfo(`▶ Reproduciendo: ${stop.name}`);
 
   // Sincronizar transmisión al Chromecast
