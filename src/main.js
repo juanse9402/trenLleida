@@ -1409,7 +1409,7 @@ function initDownloadOffline() {
 
       // Find active service worker cache
       const cacheNames = await caches.keys();
-      const cacheName = cacheNames.find(name => name.startsWith('routemaker-')) || 'routemaker-v42';
+      const cacheName = cacheNames.find(name => name.startsWith('routemaker-')) || 'routemaker-v43';
       const cache = await caches.open(cacheName);
 
       let completed = 0;
