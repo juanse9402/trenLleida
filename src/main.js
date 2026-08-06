@@ -1120,7 +1120,7 @@ function wireStateSubscriptions() {
     if (el.btnDownloadOffline) {
       el.btnDownloadOffline.className = 'btn-edit';
       const btnText = el.btnDownloadOffline.querySelector('.btn-text');
-      if (btnText) btnText.textContent = 'Descargar offline';
+      if (btnText) btnText.textContent = 'Descargar ruta (Uso Offline)';
     }
   });
   subscribe('gpsStatus',   (val) => updateGPSStatusUI(val));
@@ -1409,7 +1409,7 @@ function initDownloadOffline() {
 
       // Find active service worker cache
       const cacheNames = await caches.keys();
-      const cacheName = cacheNames.find(name => name.startsWith('routemaker-')) || 'routemaker-v40';
+      const cacheName = cacheNames.find(name => name.startsWith('routemaker-')) || 'routemaker-v41';
       const cache = await caches.open(cacheName);
 
       let completed = 0;
