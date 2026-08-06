@@ -667,15 +667,21 @@ html.dark-mode .hold-core {
     align-items: center;
   }
 
-  /* Botón circular — tamaño fijo y razonable, sin flex:1 que genera espacio vacío */
-  .top-controls-row .hold-btn-wrap {
-    width: 200px;
-    height: 200px;
-    flex: 0 0 200px;
-  }
+  /* Botón circular — tamaño dinámico para evitar cortes cuando aparece el botón de pausa */
   .top-controls-row {
     height: auto;
     padding: 10px 0;
+    gap: 15px;
+  }
+  .top-controls-row .hold-btn-wrap {
+    width: clamp(140px, 42vw, 190px);
+    height: clamp(140px, 42vw, 190px);
+    flex: 0 0 auto;
+  }
+  .top-controls-row .pause-row {
+    width: clamp(120px, 38vw, 170px);
+    height: clamp(120px, 38vw, 170px);
+    flex: 0 0 auto;
   }
 
   .hold-hint       { font-size: 10px; }
