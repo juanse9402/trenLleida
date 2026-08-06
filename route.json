@@ -86,32 +86,32 @@
         "audio": "PISTA 14 - RICADO - PARADA .mp3"
     },
     {
-        "lon": 0.618276,
-        "lat": 41.6158,
+        "lon": 0.618583,
+        "lat": 41.615694,
         "name": "RECTORAT",
         "audio": "PISTA 15 - RECTORAT.mp3"
     },
     {
-        "lon": 0,
-        "lat": 0,
+        "lon": 0.620583,
+        "lat": 41.61525,
         "name": "PALAU DEL BISBE",
         "audio": "PISTA 16 - PALAU DEL BISBE.mp3"
     },
     {
-        "lon": 0.620079,
-        "lat": 41.613931,
+        "lon": 0.620361,
+        "lat": 41.614528,
         "name": "SANT LLORENÇ",
         "audio": "PISTA 06 - SANT LLORENÇ.mp3"
     },
     {
-        "lon": 0.623562,
-        "lat": 41.611484,
+        "lon": 0.623611,
+        "lat": 41.611472,
         "name": "CATEDRAL NOVA",
         "audio": "PISTA 17 - CATEDRAL NOVA.mp3"
     },
     {
-        "lon": 0.623052,
-        "lat": 41.612033,
+        "lon": 0.623083,
+        "lat": 41.612,
         "name": "IEI ANTIC HOSPITAL STA MARIA",
         "audio": "PISTA 18 - IEI ANTIC HOSPITAL STA MARIA.mp3"
     }

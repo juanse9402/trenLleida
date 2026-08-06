@@ -53,12 +53,13 @@ html.dark-mode {
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  width: 100%; height: 100%;
+  width: 100%; height: 100dvh;
   overflow: hidden;
   font-family: 'Archivo', sans-serif;
   color: var(--paper);
   -webkit-font-smoothing: antialiased;
   background: var(--coal-950);
+  touch-action: none;
 }
 button {
   font-family: inherit; cursor: pointer;
@@ -70,7 +71,7 @@ button {
 
 /* ── APP SHELL ───────────────────────────────────────────── */
 .app-shell {
-  width: 100vw; height: 100vh;
+  width: 100vw; height: 100dvh;
   display: flex; flex-direction: column;
   background-color: var(--coal-950);
   background-image:
@@ -716,8 +717,7 @@ html.dark-mode .hold-core {
   .pill-net { display: none; }
 
   @media screen and (max-width: 600px) {
-    #btnDownloadOffline .btn-text { display: none; }
-    #btnDownloadOffline { padding: 7px 10px; }
+    /* (Download button text is now always visible since it's a main button) */
   }
 }
 
