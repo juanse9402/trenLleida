@@ -206,7 +206,11 @@ function onError(error) {
   // Auto-restart on lost signal (code 2) or timeout (code 3)
   if (error.code === 2 || error.code === 3) {
     logInfo('Pérdida temporal de señal GPS. Reintentando reconexión en 3s...');
-    stopGPS();
+    const { watchId } = getState();
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      setState({ watchId: null });
+    }
     setTimeout(startGPS, 3000);
   }
 }
@@ -243,8 +247,8 @@ export function startGPS() {
     onError,
     {
       enableHighAccuracy: true,
-      maximumAge: 0,
-      timeout: 10_000,
+      maximumAge: 3000,
+      timeout: 15_000,
     }
   );
 
@@ -257,8 +261,12 @@ export function startGPS() {
       const now = Date.now();
       const elapsed = now - _lastPositionTimestamp;
       if (elapsed > 15000) { // 15 seconds without a position update
-        logWarn('GPS inactivo (congelamiento detectado). Reiniciando seguimiento...');
-        stopGPS();
+        logWarn('GPS congelamiento detectado. Reiniciando seguimiento internamente...');
+        const currentWatchId = getState().watchId;
+        if (currentWatchId !== null) {
+          navigator.geolocation.clearWatch(currentWatchId);
+          setState({ watchId: null });
+        }
         startGPS();
       }
     }, 5000); // Check every 5 seconds

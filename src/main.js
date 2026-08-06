@@ -1081,11 +1081,13 @@ function initRGPD() {
   });
 }
 
-// Warning if there are unexported edits & release WakeLock on close
+// Warning if there are unexported edits or an active route & release WakeLock on close
 window.addEventListener('beforeunload', (e) => {
   releaseWakeLock();
   const isEdited = localStorage.getItem('routemaker_route_edited_v1') === 'true';
-  if (isEdited) {
+  const isRunning = typeof routeStarted !== 'undefined' ? routeStarted : false;
+  
+  if (isEdited || isRunning) {
     e.preventDefault();
     e.returnValue = '';
   }
