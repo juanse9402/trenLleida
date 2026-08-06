@@ -723,7 +723,24 @@ html.dark-mode .hold-core {
   .pill-net { display: none; }
 
   @media screen and (max-width: 600px) {
-    /* (Download button text is now always visible since it's a main button) */
+    .clock { display: none; }
+    #btnOpenEditor {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      color: transparent;
+      position: relative;
+    }
+    #btnOpenEditor::before {
+      content: "⚙";
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--paper);
+      font-size: 20px;
+    }
   }
 }
 
