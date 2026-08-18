@@ -67,14 +67,16 @@ const el = {
   ambientBtn:   document.getElementById('ambientBtn'),
   ambientLabel: document.getElementById('ambientLabel'),
   ambientToggleEl: document.getElementById('ambientToggleEl'),
-  btnPlayLast:  document.getElementById('btnPlayLast'),
-  btnSkip:      document.getElementById('btnSkip'),
+  btnPlayPrevious:  document.getElementById('btnPlayPrevious') || document.getElementById('btnPlayLast'),
+  btnRepeatCurrent: document.getElementById('btnRepeatCurrent'),
+  btnSkip:          document.getElementById('btnSkip'),
 
   // Log
   logList: document.getElementById('logList'),
 
   // Audio
   audioPlayer: document.getElementById('audioPlayer'),
+  stopSelector: document.getElementById('stopSelector'),
 
   // Map Stats
   mapEta:          document.getElementById('mapEta'),
@@ -253,7 +255,8 @@ const Estados = { INACTIVO: 'inactivo', ACTIVO: 'activo', PAUSADO: 'pausado' };
 function aplicarEstado(estado) {
   const { currentStopIndex } = getState();
   if (el.btnSkip) el.btnSkip.disabled = estado === Estados.INACTIVO;
-  if (el.btnPlayLast) el.btnPlayLast.disabled = estado === Estados.INACTIVO || currentStopIndex === 0;
+  if (el.btnPlayPrevious) el.btnPlayPrevious.disabled = estado === Estados.INACTIVO || currentStopIndex < 2;
+  if (el.btnRepeatCurrent) el.btnRepeatCurrent.disabled = estado === Estados.INACTIVO || currentStopIndex === 0;
 }
 
 // (Leaflet map features disabled)
@@ -659,11 +662,19 @@ function updateRouteTimerDisplay(ms) {
 function startClock() {
   const updateClock = () => {
     const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    if (el.currentTimeClock) el.currentTimeClock.textContent = timeStr;
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const timeStrShort = `${hours}:${minutes}`;
+
+    if (el.currentTimeClock) el.currentTimeClock.textContent = timeStrShort;
+
+    const elHoraActual = document.getElementById('mapHoraActual');
+    if (elHoraActual) {
+      elHoraActual.textContent = timeStrShort;
+    }
   };
   updateClock();
-  setInterval(updateClock, 15000);
+  setInterval(updateClock, 1000);
 }
 
 // ─── GPS Alert Banner — 3-Level Degradation System ───────────────────────────────
@@ -898,79 +909,74 @@ function wireControls() {
     });
   }
 
-  // PlayLast: immediately replay the last visited stop
-  if (el.btnPlayLast) {
-    el.btnPlayLast.addEventListener('click', () => {
-      const { currentStopIndex } = getState();
-      if (currentStopIndex > 0) {
-        logInfo('Repitiendo parada anterior...');
-        setState({ currentStopIndex: currentStopIndex - 1 });
-        playCurrentStop();
-      }
+  // Fast 250ms anti-bounce threshold for immediate button response without race conditions
+  let _lastControlActionTime = 0;
+  function triggerControlAction(actionFn) {
+    const now = Date.now();
+    if (now - _lastControlActionTime < 250) return;
+    _lastControlActionTime = now;
+
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate(40); } catch (_) {}
+    }
+
+    actionFn();
+  }
+
+  // PlayPrevious: immediately replay the stop before the current active stop
+  if (el.btnPlayPrevious) {
+    el.btnPlayPrevious.addEventListener('click', (e) => {
+      e.preventDefault();
+      triggerControlAction(() => {
+        const { currentStopIndex } = getState();
+        if (currentStopIndex >= 2) {
+          logInfo('Reproduciendo parada anterior...');
+          setState({ currentStopIndex: currentStopIndex - 2 });
+          playCurrentStop();
+        } else if (currentStopIndex === 1) {
+          logInfo('Reproduciendo parada anterior...');
+          setState({ currentStopIndex: 0 });
+          playCurrentStop();
+        }
+      });
     });
   }
 
-  // Skip: manually advance to next stop and play immediately
+  // RepeatCurrent: immediately replay current active stop
+  if (el.btnRepeatCurrent) {
+    el.btnRepeatCurrent.addEventListener('click', (e) => {
+      e.preventDefault();
+      triggerControlAction(() => {
+        const { currentStopIndex } = getState();
+        if (currentStopIndex > 0) {
+          logInfo('Repitiendo parada actual desde el inicio...');
+          setState({ currentStopIndex: currentStopIndex - 1 });
+          playCurrentStop();
+        }
+      });
+    });
+  }
+
+  // Skip / Siguiente audio: manually advance to next stop and play immediately
   if (el.btnSkip) {
-    el.btnSkip.addEventListener('click', () => {
-      if (el.btnSkip.hasAttribute('data-throttled')) return;
-      el.btnSkip.setAttribute('data-throttled', 'true');
-      setTimeout(() => el.btnSkip.removeAttribute('data-throttled'), 2000);
-
-      if ('vibrate' in navigator) navigator.vibrate(50);
-      logInfo('Parada omitida manualmente.');
-      playCurrentStop();
+    el.btnSkip.addEventListener('click', (e) => {
+      e.preventDefault();
+      triggerControlAction(() => {
+        logInfo('Siguiente parada accionada de inmediato.');
+        playCurrentStop();
+      });
     });
   }
 
-  // PlayLast event ended
-
-  // Retry GPS
-  if (el.btnGpsRetry) {
-    el.btnGpsRetry.addEventListener('click', () => {
-      logInfo('Reintentando activar GPS...');
-      el.btnGpsRetry.classList.add('hidden');
-      startGPS();
-    });
-  }
-
-  // GPS Alert Banner retry button — context-aware behavior
-  if (el.gpsAlertRetry) {
-    el.gpsAlertRetry.addEventListener('click', () => {
-      // Level 3 "Entendido" — just dismiss the banner
-      if (_currentGpsAlertLevel === 'lost') {
-        hideGpsAlert();
-        return;
-      }
-      // Otherwise, try to activate GPS
-      if (el.btnGpsRetry) {
-        el.btnGpsRetry.click();
-      } else {
-        logInfo('Reintentando activar GPS desde banner...');
-        startGPS();
-      }
-    });
-  }
-
-  // Ambient toggle button
-  if (el.btnAmbientToggle) {
-    el.btnAmbientToggle.addEventListener('click', () => {
-      if ('vibrate' in navigator) navigator.vibrate(50);
-      toggleAmbient();
-      updateAmbientToggleUI();
-    });
-  }
-
-  // Dropdown manual stop selection
+  // Manual stop selector: immediately start playing chosen stop when driver selects one
   if (el.stopSelector) {
     el.stopSelector.addEventListener('change', (e) => {
       const { route } = getState();
-      const newIndex = parseInt(e.target.value, 10);
-      if (Number.isFinite(newIndex) && newIndex >= 0 && newIndex < route.length) {
-        stopAudio();
-        setState({ currentStopIndex: newIndex });
-        if (el.distanceValue) el.distanceValue.textContent = '—';
-        logInfo(`Parada cambiada manualmente a: ${route[newIndex].name}`);
+      const selectedIndex = parseInt(e.target.value, 10);
+      if (Number.isFinite(selectedIndex) && selectedIndex >= 0 && selectedIndex < route.length) {
+        logInfo(`Chofer seleccionó manualmente parada #${selectedIndex + 1}: ${route[selectedIndex].name}`);
+        setState({ currentStopIndex: selectedIndex });
+        playCurrentStop();
       }
     });
   }

@@ -64,10 +64,9 @@
 
       <!-- COLUMNA IZQUIERDA: CONTROLES -->
       <div class="right-col">
-        <button id="btnDownloadOffline" class="btn-edit" aria-label="Descargar ruta offline" title="Descargar audios y ruta para uso sin conexión" style="margin-bottom: 25px; width: 100%; justify-content: center; border-color: var(--brass); color: var(--brass); font-size: 15px; padding: 14px; background: var(--coal-800);">
+        <button id="btnDownloadOffline" class="btn-edit" aria-label="Descargar ruta offline" title="Descargar audios y ruta para uso sin conexión" style="margin-bottom: 12px; width: 100%; justify-content: center; border-color: var(--brass); color: var(--brass); font-size: 14px; padding: 10px; background: var(--coal-800);">
           <span class="btn-icon">📥</span> <span class="btn-text">Descargar ruta (Uso Offline)</span>
         </button>
-        <span class="hold-hint" id="holdHint">Mantén pulsado 1.5s</span>
 
         <div class="top-controls-row">
           <div class="hold-btn-wrap" id="holdBtn">
@@ -90,17 +89,19 @@
         </div>
 
         <div class="secondary-row">
-          <button class="secondary-btn" id="btnPlayLast" aria-label="Repetir" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
-            Repetir
+          <button class="secondary-btn" id="btnPlayPrevious" aria-label="Reproducir Anterior" disabled>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 6L3 12l8 6V6zm10 0l-8 12l8 6V6z"/></svg>
+            <span>Reproducir Anterior</span>
+          </button>
+          <button class="secondary-btn" id="btnRepeatCurrent" aria-label="Repetir actual" disabled>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L7 5l5 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l5-4-5-4v3z"/></svg>
+            <span>Repetir actual</span>
           </button>
           <button class="btn-siguiente" id="btnSkip" aria-label="Siguiente audio">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
-            Siguiente audio
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 6v12l8-6-8-6zM3 6v12l8-6-8-6z"/></svg>
+            <span>Siguiente audio</span>
           </button>
         </div>
-
-
 
         <div class="ambient-btn" id="ambientBtn" aria-label="Alternar música ambiente">
           <div class="ambient-btn-left">
@@ -117,15 +118,12 @@
         </div>
       </div>
 
-      <!-- COLUMNA DERECHA: now-playing + stats (2 filas) -->
+      <!-- COLUMNA DERECHA: Estado Audios + Estadísticas -->
       <div class="cluster-card-wrapper">
 
-        <!-- Bloque unificado de audio -->
+        <!-- Bloque unificado de audio en la parte superior derecha (Grandes dimensiones) -->
         <div class="now-playing-card">
-          <div class="now-playing-top" style="position:relative;">
-            <select id="stopSelector" aria-label="Seleccionar parada" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none;">
-              <option disabled selected>Cargando ruta...</option>
-            </select>
+          <div class="now-playing-top">
             <span class="now-playing-icon">🎵</span>
             <div class="now-playing-info">
               <div class="now-playing-label" id="nowPlayingLabel">Reproduciendo ahora</div>
@@ -135,14 +133,21 @@
               <span id="audioCurrentTime">0:00</span> / <span id="audioDuration">0:00</span>
             </span>
           </div>
+
           <div class="now-playing-bar">
             <div class="now-playing-fill" id="progressBar" style="width:0%"></div>
           </div>
+
           <div class="now-playing-next">
             <span class="now-playing-next-arrow">↳</span>
             <span class="now-playing-next-label">A continuación:</span>
             <span class="now-playing-next-name" id="paradaSiguienteNombre">—</span>
           </div>
+
+          <!-- Selector táctil de parada manual -->
+          <select id="stopSelector" aria-label="Seleccionar parada manual">
+            <option disabled selected>Cargando ruta...</option>
+          </select>
         </div>
 
         <!-- Estadísticas 2×2 -->
@@ -161,8 +166,8 @@
               <span class="route-stat-value" id="mapTimeInRoute">00:00:00</span>
             </div>
             <div class="route-stat">
-              <span class="route-stat-label">Distancia próxima</span>
-              <span class="route-stat-value" id="mapDistancia">— m</span>
+              <span class="route-stat-label">Hora actual</span>
+              <span class="route-stat-value clock-value" id="mapHoraActual">12:00</span>
             </div>
             <div class="route-stat">
               <span class="route-stat-label">Velocidad</span>
@@ -170,7 +175,6 @@
             </div>
           </div>
         </div>
-
       </div><!-- /cluster-card-wrapper -->
 
     </div><!-- /main -->

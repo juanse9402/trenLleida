@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transcripción y Guiones de Audio — Tren de Lleida</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fraunces:wght@700&display=swap');
+
+    :root {
+      --coal-950: #0b0c10;
+      --coal-900: #12141a;
+      --coal-800: #1a1d26;
+      --brass-500: #e5b94c;
+      --brass-400: #f3cf68;
+      --text-main: #f0f2f5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--coal-950);
+      color: var(--text-main);
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 2.2rem;
+      color: var(--brass-400);
+      margin-bottom: 0.4rem;
+    }
+
+    p.subtitle {
+      color: #9aa1b3;
+      font-size: 0.95rem;
+    }
+
+    .track-card {
+      background: var(--coal-900);
+      border: 1px solid rgba(229, 185, 76, 0.25);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .track-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .track-num {
+      background: rgba(229, 185, 76, 0.15);
+      color: var(--brass-400);
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .track-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.2rem;
+      color: var(--text-main);
+    }
+
+    .track-filename {
+      font-size: 0.8rem;
+      color: #646c7e;
+      font-family: monospace;
+    }
+
+    audio {
+      width: 100%;
+      height: 40px;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      background: var(--coal-800);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: #fff;
+      padding: 0.8rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      border-color: var(--brass-500);
+      outline: none;
+    }
+
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--coal-900);
+      padding: 1rem 1.5rem;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .btn-action {
+      background: linear-gradient(135deg, var(--brass-500), #997825);
+      color: #0b0c10;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>📝 Guiones de Audio — Tren de Lleida</h1>
+      <p class="subtitle">Audios organizados en el orden exacto del recorrido GPS de Lleida</p>
+    </header>
+
+    <div class="actions-bar">
+      <span>18 Paradas del Recorrido</span>
+      <button class="btn-action" onclick="exportMarkdown()">📥 Descargar guiones_audio.md</button>
+    </div>
+
+    <div id="tracksList">
+      <!-- Generated via JS -->
+    </div>
+  </div>
+
+  <script>
+    const stopsOrder = [
+      { num: 1, name: "BENVINGUDA CENTRE HISTORIC", audio: "PISTA 01 - BENVINGUDA CENTRE HISTORIC.mp3" },
+      { num: 2, name: "CINEMA VINYES - RIU SEGRE - GEGANTS", audio: "PISTA 02 - CINEMA VINYES - RIU SEGRE - GEGANTS.mp3" },
+      { num: 3, name: "AV CATALUNYA CASA BARO", audio: "PISTA 03 - AV CATALUNYA CASA BARO.mp3" },
+      { num: 4, name: "MUSEU LLEIDA", audio: "PISTA 04 - MUSEU LLEIDA.mp3" },
+      { num: 5, name: "SANTA CLARA - CASTELLERS", audio: "PISTA 05 - SANTA CLARA - CASTELLERS.mp3" },
+      { num: 6, name: "SANT MARTI", audio: "PISTA 07 - SANT MARTI.mp3" },
+      { num: 7, name: "MERCAT DEL PLA", audio: "PISTA 08 - MERCAT DEL PLA.mp3" },
+      { num: 8, name: "TURO SEU VELLA", audio: "PISTA 09 - TURO SEU VELLA.mp3" },
+      { num: 9, name: "SEU VELLA 1", audio: "PISTA 10 - SEU VELLA 1.mp3" },
+      { num: 10, name: "SEU VELLA 2", audio: "PISTA 11 - SEU VELLA 2.mp3" },
+      { num: 11, name: "SEU VELLA 3", audio: "PISTA 12 - SEU VELLA 3.mp3" },
+      { num: 12, name: "SANTA CECILIA", audio: "PISTA 13 - SANTA CECILIA.mp3" },
+      { num: 13, name: "RICADO - PARADA", audio: "PISTA 14 - RICADO - PARADA .mp3" },
+      { num: 14, name: "RECTORAT", audio: "PISTA 15 - RECTORAT.mp3" },
+      { num: 15, name: "PALAU DEL BISBE", audio: "PISTA 16 - PALAU DEL BISBE.mp3" },
+      { num: 16, name: "SANT LLORENÇ", audio: "PISTA 06 - SANT LLORENÇ.mp3" },
+      { num: 17, name: "CATEDRAL NOVA", audio: "PISTA 17 - CATEDRAL NOVA.mp3" },
+      { num: 18, name: "IEI ANTIC HOSPITAL STA MARIA", audio: "PISTA 18 - IEI ANTIC HOSPITAL STA MARIA.mp3" }
+    ];
+
+    const listEl = document.getElementById('tracksList');
+
+    stopsOrder.forEach(stop => {
+      const card = document.createElement('div');
+      card.className = 'track-card';
+      card.innerHTML = `
+        <div class="track-header">
+          <div>
+            <span class="track-num">Parada #${stop.num}</span>
+            <span class="track-title">${stop.name}</span>
+          </div>
+          <span class="track-filename">${stop.audio}</span>
+        </div>
+        <audio controls src="audios/${encodeURIComponent(stop.audio)}"></audio>
+        <textarea id="text-${stop.num}" placeholder="Escribe o revisa aquí la transcripción del audio de ${stop.name}..."></textarea>
+      `;
+      listEl.appendChild(card);
+    });
+
+    function exportMarkdown() {
+      let md = '# 📝 Guion de Audios del Recorrido — Tren de Lleida\n\n';
+      md += 'Este documento contiene la transcripción completa de los audios del tren turístico de Lleida en orden exacto de ruta.\n\n---\n\n';
+
+      stopsOrder.forEach(stop => {
+        const text = document.getElementById(`text-${stop.num}`).value || '(Sin transcripción)';
+        md += `## 🔊 Parada ${stop.num}: ${stop.name}\n\n`;
+        md += `> **Archivo**: \`${stop.audio}\`  \n\n`;
+        md += `> ${text}\n\n---\n\n`;
+      });
+
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'guiones_audio_lleida.md';
+      a.click();
+    }
+  </script>
+</body>
+</html>

@@ -19,6 +19,7 @@ const AUDIO_PREFIX = 'indexeddb_';
 let _player = null;
 let _ambientPlayer = null;
 let _currentObjectUrl = null;
+let _activePlayRequestId = 0;
 
 // Preload state
 let _preloadedStopIndex = -1;
@@ -355,6 +356,7 @@ async function _resolveSource(stop) {
  * @returns {Promise<void>}
  */
 export async function playCurrentStop() {
+  const requestId = ++_activePlayRequestId;
   const { route, currentStopIndex } = getState();
 
   if (currentStopIndex >= route.length) {
@@ -382,50 +384,36 @@ export async function playCurrentStop() {
     console.error('Error enviando video al Chromecast:', err);
   }
 
-  // Stop any current playback cleanly first
+  // Detener inmediatamente cualquier audio sonando antes
   stopAudio();
 
-  setState({ audioStatus: 'playing' });
+  // Avanzar índice y actualizar estado inmediatamente para evitar condiciones de carrera
+  setState({
+    audioStatus: 'playing',
+    currentStopIndex: currentStopIndex + 1
+  });
 
-  // Safety net: ensure audio is unlocked on mobile
+  // Safety net: asegurar desbloqueo de audio en móvil
   if (!_unlocked) await unlockAudio();
+
+  if (requestId !== _activePlayRequestId) return;
 
   try {
     const src = await _resolveSource(stop);
 
-    await new Promise((resolve, reject) => {
-      const onReady = () => {
-        cleanup();
-        resolve();
-      };
-      const onError = () => {
-        cleanup();
-        reject(new Error(_player.error?.message ?? 'Error cargando audio'));
-      };
+    if (requestId !== _activePlayRequestId) return;
 
-      function cleanup() {
-        _player.removeEventListener('canplaythrough', onReady);
-        _player.removeEventListener('error', onError);
-      }
-
-      _player.addEventListener('canplaythrough', onReady, { once: true });
-      _player.addEventListener('error', onError, { once: true });
-
-      _player.src = src;
-      _player.load();
-    });
+    _player.src = src;
+    _player.load();
 
     await _player.play();
-
-    // Audio started successfully — advance index NOW
-    setState({ currentStopIndex: currentStopIndex + 1 });
-    logSuccess(`Parada completada: ${stop.name}`);
+    logSuccess(`Parada en reproducción: ${stop.name}`);
 
   } catch (err) {
+    if (requestId !== _activePlayRequestId) return;
     _revokeCurrentUrl();
     setState({ audioStatus: 'error' });
     logError(`Error en "${stop.name}": ${err.message}`);
-    // Recover: don't advance index so user can retry or skip manually
     setState({ audioStatus: 'idle' });
   }
 }
