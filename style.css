@@ -466,12 +466,67 @@ html.dark-mode .hold-core {
   font-weight: 900;
   text-transform: uppercase;
   color: var(--paper);
-  line-height: 1.1;
+  line-height: 1.15;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  position: relative;
+  max-width: 100%;
 }
 .now-playing-name .now-playing-num { color: var(--brick-bright); }
+
+/* Marquee / Desplazamiento tipo gusano para nombres de paradas largos */
+.now-playing-name .marquee-track {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.now-playing-name .marquee-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.now-playing-name .marquee-spacer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28px;
+  color: var(--brass);
+  font-size: 0.65em;
+  opacity: 0.8;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* Efecto gusano activo: máscara de bordes y desplazamiento continuo */
+.now-playing-name.has-marquee {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 8px, black calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, black 8px, black calc(100% - 24px), transparent 100%);
+}
+
+.now-playing-name.has-marquee .marquee-track {
+  animation: marquee-ticker var(--marquee-duration, 14s) linear infinite;
+  animation-delay: 1.2s;
+  animation-fill-mode: backwards;
+}
+
+/* Pausa táctil o con cursor para inspeccionar cómodamente */
+.now-playing-name.has-marquee:hover .marquee-track,
+.now-playing-name.has-marquee:active .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
 .now-playing-time {
   font-family: 'JetBrains Mono', monospace;
   font-size: clamp(16px, 1.6vw, 20px);
@@ -771,14 +826,13 @@ html.dark-mode .hold-core {
 
   .now-playing-card { padding: 16px 18px; flex-shrink: 0; }
 
-  /* Nombre de parada — máx 2 líneas, tamaño controlado */
+  /* Nombre de parada en móvil — línea única limpia con efecto gusano si desborda */
   .now-playing-name {
     font-size: 22px;
-    white-space: normal;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    white-space: nowrap;
+    display: block;
     overflow: hidden;
+    line-height: 1.2;
   }
   .now-playing-time { font-size: 14px; padding-top: 12px; }
   .now-playing-bar  { height: 16px; margin-bottom: 12px; }

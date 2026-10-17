@@ -261,6 +261,89 @@ function aplicarEstado(estado) {
 
 // (Leaflet map features disabled)
 
+// ─── Marquee Ticker ("Gusano") para Parada Actual ───────────────────────────
+let _marqueeResizeTimer = null;
+
+function renderNowPlayingName(htmlContent) {
+  const elParadaActual = document.getElementById('paradaActualNombre');
+  if (!elParadaActual) return;
+
+  elParadaActual.dataset.marqueeContent = htmlContent;
+
+  // Insertar un solo ítem para medición limpia inicial
+  elParadaActual.classList.remove('has-marquee');
+  elParadaActual.innerHTML = `<div class="marquee-track"><span class="marquee-item">${htmlContent}</span></div>`;
+
+  requestAnimationFrame(() => {
+    // Si el contenido cambió mientras se procesaba el frame, salir
+    if (elParadaActual.dataset.marqueeContent !== htmlContent) return;
+
+    const track = elParadaActual.querySelector('.marquee-track');
+    const item = elParadaActual.querySelector('.marquee-item');
+    if (!track || !item) return;
+
+    const containerWidth = elParadaActual.clientWidth;
+    const contentWidth = item.offsetWidth;
+
+    // Solo activar gusano cuando el texto realmente desborda el ancho disponible
+    if (containerWidth > 0 && contentWidth > containerWidth + 4) {
+      elParadaActual.classList.add('has-marquee');
+
+      // Duplicar contenido con un separador de diamante para bucle infinito continuo
+      track.innerHTML = `
+        <span class="marquee-item">${htmlContent}</span>
+        <span class="marquee-spacer">✦</span>
+        <span class="marquee-item" aria-hidden="true">${htmlContent}</span>
+        <span class="marquee-spacer" aria-hidden="true">✦</span>
+      `;
+
+      // Velocidad de lectura confortable (~38px por segundo)
+      const spacer = track.querySelector('.marquee-spacer');
+      const spacerWidth = spacer ? spacer.offsetWidth : 56;
+      const singleDistance = contentWidth + spacerWidth;
+      const durationSec = Math.max(9, singleDistance / 38);
+
+      track.style.setProperty('--marquee-duration', `${durationSec.toFixed(2)}s`);
+    } else {
+      elParadaActual.classList.remove('has-marquee');
+      track.style.removeProperty('--marquee-duration');
+    }
+  });
+}
+
+function initMarqueeObserver() {
+  const elParada = document.getElementById('paradaActualNombre');
+  if (!elParada) return;
+
+  if (window.ResizeObserver) {
+    let lastWidth = elParada.clientWidth;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const curWidth = Math.round(entry.contentRect.width);
+        if (Math.abs(curWidth - lastWidth) > 6) {
+          lastWidth = curWidth;
+          if (elParada.dataset.marqueeContent) {
+            clearTimeout(_marqueeResizeTimer);
+            _marqueeResizeTimer = setTimeout(() => {
+              renderNowPlayingName(elParada.dataset.marqueeContent);
+            }, 80);
+          }
+        }
+      }
+    });
+    observer.observe(elParada);
+  } else {
+    window.addEventListener('resize', () => {
+      clearTimeout(_marqueeResizeTimer);
+      _marqueeResizeTimer = setTimeout(() => {
+        if (elParada.dataset.marqueeContent) {
+          renderNowPlayingName(elParada.dataset.marqueeContent);
+        }
+      }, 100);
+    });
+  }
+}
+
 function updateRouteUI() {
   const { route, currentStopIndex } = getState();
   const total = route.length;
@@ -269,7 +352,7 @@ function updateRouteUI() {
   const elParadaSiguiente = document.getElementById('paradaSiguienteNombre');
 
   if (total === 0) {
-    if (elParadaActual) elParadaActual.textContent = 'Sin ruta cargada';
+    if (elParadaActual) renderNowPlayingName('Sin ruta cargada');
     if (elParadaSiguiente) elParadaSiguiente.textContent = '—';
     if (el.stopCounter) el.stopCounter.textContent = '— / —';
     if (el.mapStopCounter) el.mapStopCounter.textContent = '— / —';
@@ -277,7 +360,7 @@ function updateRouteUI() {
   }
 
   if (currentStopIndex >= total) {
-    if (elParadaActual) elParadaActual.textContent = '¡Ruta completada!';
+    if (elParadaActual) renderNowPlayingName('¡Ruta completada!');
     if (elParadaSiguiente) elParadaSiguiente.textContent = '—';
     if (el.distanceValue) el.distanceValue.textContent = '—';
     if (el.stopCounter) el.stopCounter.textContent = `${total} / ${total}`;
@@ -289,9 +372,9 @@ function updateRouteUI() {
     if (currentStopIndex > 0 && route[currentStopIndex - 1]) {
       const p = route[currentStopIndex - 1];
       const numStr = String(currentStopIndex).padStart(2, '0');
-      elParadaActual.innerHTML = `<span class="now-playing-num">${numStr}.</span> ${p.name}`;
+      renderNowPlayingName(`<span class="now-playing-num">${numStr}.</span> ${p.name}`);
     } else {
-      elParadaActual.textContent = 'Inactivo';
+      renderNowPlayingName('Inactivo');
     }
   }
 
@@ -599,7 +682,7 @@ function onRouteComplete() {
 
   if (el.nowPlayingLabel) el.nowPlayingLabel.textContent = 'LISTA PARA SIGUIENTE VUELTA';
   if (elParadaActual && route[0]) {
-    elParadaActual.innerHTML = `<span class="now-playing-num">01.</span> ${route[0].name}`;
+    renderNowPlayingName(`<span class="now-playing-num">01.</span> ${route[0].name}`);
   }
   if (elParadaSiguiente && route[1]) {
     elParadaSiguiente.textContent = `02. ${route[1].name}`;
@@ -1268,6 +1351,7 @@ async function boot() {
     initFullscreenBtn();
     initAmbientToggle();
     initDownloadOffline();
+    initMarqueeObserver();
 
     // Start local time clock
     startClock();
