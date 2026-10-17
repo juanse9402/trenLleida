@@ -26,6 +26,18 @@ let _preloadedStopIndex = -1;
 let _preloadedObjectUrl = null;
 let _unlocked = false;
 
+// Audio queue state: if arrival happens while previous audio is still playing
+let _queuedStopIndex = null;
+let _queuedTimeout = null;
+
+export function isAudioPlaying() {
+  return !!(_player && !_player.paused && !_player.ended && _player.currentTime > 0);
+}
+
+export function isAudioQueued() {
+  return _queuedStopIndex !== null;
+}
+
 // Web Audio API context and nodes for iOS volume control bypass
 let _audioCtx = null;
 let _ambientSource = null;
@@ -123,6 +135,24 @@ export function initAudio(el) {
     _revokeCurrentUrl();
     setState({ audioStatus: 'idle' });
     logInfo('Audio finalizado.');
+
+    // 1. Si hay una parada en cola esperando que terminara el audio anterior:
+    if (_queuedStopIndex !== null) {
+      const pendingIndex = _queuedStopIndex;
+      _queuedStopIndex = null;
+      const { route } = getState();
+      const nextStop = route[pendingIndex];
+      const stopName = nextStop ? nextStop.name : 'siguiente parada';
+      logSuccess(`▶ Audio anterior finalizado. Iniciando automáticamente: ${stopName}`);
+
+      _queuedTimeout = setTimeout(() => {
+        _queuedTimeout = null;
+        setState({ currentStopIndex: pendingIndex });
+        playCurrentStop({ force: true });
+      }, 1000); // 1s de respiro antes del siguiente audio
+      return;
+    }
+
     if (_ambientPlayer && !_ambientPlayer.paused) {
       fadeVolume(_ambientPlayer, AMBIENT_VOLUME_NORMAL, FADE_UP_MS);
     }
@@ -131,7 +161,10 @@ export function initAudio(el) {
     const finishedStop = route[currentStopIndex - 1];
     if (finishedStop && finishedStop.autoNext && currentStopIndex < route.length) {
       logInfo(`Empalmando automáticamente con la siguiente parada...`);
-      setTimeout(() => playCurrentStop(), 1000); // 1s de respiro antes del siguiente
+      _queuedTimeout = setTimeout(() => {
+        _queuedTimeout = null;
+        playCurrentStop();
+      }, 1000); // 1s de respiro antes del siguiente
     }
   });
 
@@ -355,7 +388,8 @@ async function _resolveSource(stop) {
  *
  * @returns {Promise<void>}
  */
-export async function playCurrentStop() {
+export async function playCurrentStop(options = {}) {
+  const { force = false } = (typeof options === 'object' && options !== null) ? options : {};
   const requestId = ++_activePlayRequestId;
   const { route, currentStopIndex } = getState();
 
@@ -372,7 +406,28 @@ export async function playCurrentStop() {
     return;
   }
 
+  // SI EL AUDIO ANTERIOR NO HA TERMINADO Y NO ES UNA ACCIÓN MANUAL (FORZADA):
+  // Esperar a que termine e iniciar automáticamente en cuanto finalice.
+  if (!force && isAudioPlaying()) {
+    _queuedStopIndex = currentStopIndex;
+    logInfo(`⏳ Llegada a "${stop.name}". Esperando que termine el audio anterior para iniciar automáticamente...`);
+    window.dispatchEvent(new CustomEvent('audio:waiting', { 
+      detail: { stop, index: currentStopIndex } 
+    }));
+    return;
+  }
+
+  // Limpiar cualquier cola previa ya que esta parada empezará ahora
+  _queuedStopIndex = null;
+  if (_queuedTimeout) {
+    clearTimeout(_queuedTimeout);
+    _queuedTimeout = null;
+  }
+
   logInfo(`▶ Reproduciendo: ${stop.name}`);
+  window.dispatchEvent(new CustomEvent('audio:playing-started', {
+    detail: { stop, index: currentStopIndex }
+  }));
 
   // Sincronizar transmisión al Chromecast
   try {
@@ -422,6 +477,11 @@ export async function playCurrentStop() {
  * Stop audio immediately and reset.
  */
 export function stopAudio() {
+  _queuedStopIndex = null;
+  if (_queuedTimeout) {
+    clearTimeout(_queuedTimeout);
+    _queuedTimeout = null;
+  }
   if (_player) {
     _player.pause();
     _player.currentTime = 0;

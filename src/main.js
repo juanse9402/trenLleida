@@ -1015,11 +1015,11 @@ function wireControls() {
         if (currentStopIndex >= 2) {
           logInfo('Reproduciendo parada anterior...');
           setState({ currentStopIndex: currentStopIndex - 2 });
-          playCurrentStop();
+          playCurrentStop({ force: true });
         } else if (currentStopIndex === 1) {
           logInfo('Reproduciendo parada anterior...');
           setState({ currentStopIndex: 0 });
-          playCurrentStop();
+          playCurrentStop({ force: true });
         }
       });
     });
@@ -1034,7 +1034,7 @@ function wireControls() {
         if (currentStopIndex > 0) {
           logInfo('Repitiendo parada actual desde el inicio...');
           setState({ currentStopIndex: currentStopIndex - 1 });
-          playCurrentStop();
+          playCurrentStop({ force: true });
         }
       });
     });
@@ -1046,7 +1046,7 @@ function wireControls() {
       e.preventDefault();
       triggerControlAction(() => {
         logInfo('Siguiente parada accionada de inmediato.');
-        playCurrentStop();
+        playCurrentStop({ force: true });
       });
     });
   }
@@ -1059,10 +1059,23 @@ function wireControls() {
       if (Number.isFinite(selectedIndex) && selectedIndex >= 0 && selectedIndex < route.length) {
         logInfo(`Chofer seleccionó manualmente parada #${selectedIndex + 1}: ${route[selectedIndex].name}`);
         setState({ currentStopIndex: selectedIndex });
-        playCurrentStop();
+        playCurrentStop({ force: true });
       }
     });
   }
+
+  // Eventos para estado visual de parada en espera
+  window.addEventListener('audio:waiting', (e) => {
+    if (el.nowPlayingLabel) {
+      el.nowPlayingLabel.innerHTML = 'Reproduciendo ahora <span style="color:var(--brick-bright);font-size:0.85em;margin-left:6px;">● Siguiente en espera</span>';
+    }
+  });
+
+  window.addEventListener('audio:playing-started', () => {
+    if (el.nowPlayingLabel) {
+      el.nowPlayingLabel.textContent = 'Reproduciendo ahora';
+    }
+  });
 }
 
 function wireGPSEvents() {

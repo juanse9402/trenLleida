@@ -10,7 +10,7 @@
 
 import { getState, setState, markStopTriggered, loadSavedProgress, clearSavedProgress } from './state.js';
 import { logInfo, logWarn, logError, logSuccess } from './logger.js';
-import { playCurrentStop } from './audio.js';
+import { playCurrentStop, isAudioQueued } from './audio.js';
 
 const STOP_RADIUS_METERS    = 10;   // Distance to trigger audio (Rule 3)
 const MAX_ACCURACY_METERS   = 35;   // Discard GPS readings worse than this
@@ -183,6 +183,9 @@ function onPosition(position) {
   }));
 
   if (distance <= effectiveRadius) {
+    // Si la parada ya está en cola esperando que termine el audio anterior, no duplicar
+    if (isAudioQueued && isAudioQueued()) return;
+
     // Cooldown guard — prevents double trigger on same stop
     const canTrigger = markStopTriggered(currentStopIndex, STOP_COOLDOWN_MS);
     if (!canTrigger) return;
